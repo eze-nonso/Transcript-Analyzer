@@ -11,10 +11,12 @@ import Script from '../models/script.model';
 
 @Injectable({providedIn: 'root'})
 export default class CallState {
+
+  private readonly defaultMatchingSensitivity: number = 38;
   private readonly _activeAgentCalls$     = new BehaviorSubject<Call[]>([]);
   private readonly _activeTranscript$     = new BehaviorSubject<Transcript | null>(null);
   private readonly _calls$                = new BehaviorSubject<Call[]>([]);
-  private readonly _matchingPercentage$   = new BehaviorSubject<number>(38);
+  private readonly _matchingPercentage$   = new BehaviorSubject<number>(this.defaultMatchingSensitivity);
   private readonly _transcripts$          = new BehaviorSubject<Transcript[]>([]);
   private readonly _matchingTranscripts$  = new BehaviorSubject<Script[]>([]);
   private readonly _activeMatchedScript$  = new BehaviorSubject<Script | null>(null);
