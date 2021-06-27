@@ -4,5 +4,5 @@ export const ROUTES: Routes = [{
   path: '',
   // pathMatch: 'full',
   loadChildren: () => import('./modules/main/main.module')
-    .then(m => m.MainModule).catch(e => { throw e })
+    .then(m => m.MainModule).catch(e => { throw e; })
 }];

@@ -17,7 +17,7 @@ export default class AgentState {
   }
 
   public setActiveAgent(agentId: string): void {
-    const agent = this._agents$.value.find((agent: Agent) => agent.id === agentId);
+    const agent = this._agents$.value.find((agnt: Agent) => agnt.id === agentId);
     this._activeAgent$.next(agent);
-  }   
+  }
 }

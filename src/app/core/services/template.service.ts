@@ -8,7 +8,7 @@ export default class TemplateService {
     set templates(templates: {[key: string]: TemplateRef<any> | undefined}) {
         this._templates = templates;
     }
-    private _templates: {[key: string]: any} = {}
+    private _templates: {[key: string]: any} = {};
 
     get(token: string): TemplateRef<any> | undefined {
         return this._templates[token];
@@ -16,5 +16,5 @@ export default class TemplateService {
 
     register(token: string, tpl?: TemplateRef<any> | undefined): void {
         this._templates[token] = tpl;
-    }   
+    }
 }

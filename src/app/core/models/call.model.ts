@@ -1,6 +1,6 @@
-import {JsonObject, JsonProperty} from "json2typescript";
+import {JsonObject, JsonProperty} from 'json2typescript';
 import Channel from 'src/app/core/models/channel.model';
-import DateConverter from "./dateConverter";
+import DateConverter from './dateConverter';
 
 @JsonObject('Call')
 export default class Call {

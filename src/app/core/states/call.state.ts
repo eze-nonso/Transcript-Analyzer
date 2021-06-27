@@ -47,29 +47,32 @@ export default class CallState {
   }
 
   public selectCall(id: string): void {
-    const transcript = this._transcripts$.value.find((transcript) => transcript.id === id);
-    this._activeTranscript$.next(transcript? transcript : null);
+    const transcript = this._transcripts$.value.find((tscript) => tscript.id === id);
+    this._activeTranscript$.next(transcript ? transcript : null);
   }
 
   public setMatchingPercentage(value: number | string): void {
-    if (value !== 'default')
-      this._matchingPercentage$.next(parseInt(`${value}`));
-    let transcript = this._activeTranscript$.getValue();
-    let matchingTranscripts = transcript?.transcript.filter(transcript => {
-      if (transcript === null || transcript.similarity === null)
+    if (value !== 'default') {
+      this._matchingPercentage$.next(parseInt(`${value}`, 10));
+    }
+    const transcript = this._activeTranscript$.getValue();
+    let matchingTranscripts = transcript?.transcript.filter(tscript => {
+      if (tscript === null || tscript.similarity === null) {
         return false;
-      return transcript.similarity * 100 >= this._matchingPercentage$.value;
+      }
+      return tscript.similarity * 100 >= this._matchingPercentage$.value;
     });
     const scripts = this._activeTranscript$.getValue()?.script;
-    matchingTranscripts = matchingTranscripts?.filter(transcript => {
-      return scripts?.find(s => s.matchingSentence === transcript.sentence) ? true : false;
+    matchingTranscripts = matchingTranscripts?.filter(tscript => {
+      return scripts?.find(s => s.matchingSentence === tscript.sentence) ? true : false;
     });
     this._matchingTranscripts$.next(matchingTranscripts || []);
   }
 
   public setActiveMatchedScript(transcriptSentence: string | null): void {
-    if (transcriptSentence === null)
+    if (transcriptSentence === null) {
       this._activeMatchedScript$.next(null);
+    }
     const scripts = this._activeTranscript$?.value?.script
     .find((script) => script.matchingSentence === transcriptSentence);
     this._activeMatchedScript$.next(scripts || null);

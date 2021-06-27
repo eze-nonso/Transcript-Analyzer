@@ -1,4 +1,4 @@
-import {JsonObject, JsonProperty} from "json2typescript";
+import {JsonObject, JsonProperty} from 'json2typescript';
 import DateConverter from './dateConverter';
 import Channel from 'src/app/core/models/channel.model';
 import Script from 'src/app/core/models/script.model';
