@@ -7,12 +7,21 @@ import { CoreModule } from 'src/app/core/core.module';
 import AnalyzerComponent from './analyzer.component';
 import { ROUTES } from './analyzer.routes';
 
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 @NgModule({
     declarations: [ AnalyzerComponent ],
     imports: [
         CoreModule,
         RouterModule.forChild(ROUTES),
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        MatSelectModule,
+        MatIconModule,
+        MatButtonModule,
+        MatTooltipModule,
     ]
 })
 export class AnalyzerModule {}

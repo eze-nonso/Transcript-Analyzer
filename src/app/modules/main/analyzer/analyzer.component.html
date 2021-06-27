@@ -1,93 +1,140 @@
 <ng-template #subHeader>
-  <div class="flex">
-    <div class="selects">
-      <div class="select">
-        <label for="agent">Agent</label>
-        <select (change)="selectAgent($event)" id="agent" name="agent">
-          <option *ngFor="let agent of agents.agents$ | async" [value]="agent.id">{{agent.fullName}}</option>
-        </select>
+  <div class="d-flex flex-wrap justify-content-between">
+    <div class="d-flex align-items-center selects">
+
+      <div class="select mr-auto">
+        <div [ngClass]="{'overlay': count(agents.agents$ | async) <= 0}">
+          <mat-form-field appearance="fill">
+            <mat-icon class="png-icon" matPrefix>
+              <img src="..\assets\img\agent.png">
+            </mat-icon>
+            <mat-select disableOptionCentering panelClass="myPanelClass"
+            placeholder="Agent" 
+            (selectionChange)="selectAgent($event); selectedCall=null; selectCall('');" id="agent" name="agent" aria-label="Agent select">
+              <mat-option
+              *ngFor="let agent of agents.agents$ | async" [value]="agent.id">
+                {{agent.fullName}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
       </div>
 
       <div class="select">
-        <label for="call">Call</label>
-        <select (change)="selectCall($event)" id="call" name="call">
-          <option *ngFor="let call of calls.activeAgentCalls$ | async" [value]="call.id">{{call.startTime}}</option>
-        </select>
-      </div>  
+        <div [ngClass]="{'overlay': count(calls.activeAgentCalls$ | async) <= 0}">
+          <mat-form-field appearance="fill">
+            <mat-icon class="png-icon" matPrefix>
+              <img src="..\assets\img\phone.png">
+            </mat-icon>
+            <mat-select disableOptionCentering panelClass="myPanelClass"
+            placeholder="Call"
+            [(value)]="selectedCall"
+            (selectionChange)="selectCall($event); resetCounter();" id="call" name="call" aria-label="Call select">
+              <mat-option
+              *ngFor="let call of calls.activeAgentCalls$ | async"
+              [value]="call.id">
+                {{(call.startTime | date:'M/d/yyyy') + " - " + call.customer?.speakerName || ""}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
     </div>
 
-    <div style="align-items: center; display: flex; gap: .5rem;">
-      MATCHING SENSITIVITY
+    <div *ngIf="calls.activeTranscript$ | async" class="d-flex slide-bar align-items-center">
+      <h3>MATCHING SENSITIVITY</h3>
       <input
         #matcher 
         (change)="calls.setMatchingPercentage(matcher.value)"
         [value]="calls.matchingPercentage$ | async"
         max="100"
         min="1" type="range"
-        value="38">
+        class='mr-auto'>
+      <label for="matcher" class='pt-2'><h3 class='d-inline'>{{matcher.value}}%</h3></label>
     </div>
   </div>
 </ng-template>
 
-<section class="content">
-  <div class="card">
-    <h1>
-      Real
-      <span>Matching: {{getScriptAlignmentPercentage() | async}}</span>
-    </h1>
-    <table *ngIf="calls.activeTranscript$ | async as call" width="100%">
-      <thead>
-      <th>Time</th>
-      <th>Speaker</th>
-      <th>Sentence</th>
-      </thead>
-      <tbody>
-      <tr *ngFor="let transcript of call.transcript"
-      (mouseover)="setActiveMatchedScript(transcript.sentence); transcriptInFocus=transcript;"
-      (mouseout)="setActiveMatchedScript(null); transcriptInFocus=null;">
-        <td>{{ transcript.timeFrom }}</td>
-        <td>{{ call.getSpeaker(transcript.channel) }}</td>
-        <td [title]="getTooltipMessage(transcript, calls.activeMatchedScript$ | async, (calls.activeTranscript$ | async)?.script)"
-        [ngClass]="{'matched' : (calls.matchingTranscripts$ | async) ?.includes(transcript),
-        'matchedScript' : (calls.matchingTranscripts$ | async) ?.includes(transcript) && transcriptInFocus===transcript
-        }">
-          {{ transcript.sentence }}
-        </td>
-      </tr>
-      </tbody>
-    </table>
+<div *ngIf="calls.activeTranscript$ | async; else noContent;" class="container-fluid">
+  <div class="row">
+    <div class="col-xl-6 mt-4">
+      <div class="card">
+        <h3>
+          <span class="font-weight-bold">Real</span>
+          Alignment to the expected script: {{getScriptAlignmentPercentage() | async}}
+        </h3>
+        <table *ngIf="calls.activeTranscript$ | async as call" width="100%" class='table table-borderless table-fixed'>
+          <thead>
+            <tr>
+              <th class='col-xl-2 col-lg-1 col-md-1 col-2'>Time</th>
+              <th class='col-xl-3 col-lg-2 col-md-3 col-3'>Speaker</th>
+              <th class='col-xl-7 col-lg-9 col-md-8 col-7'>Sentence</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let transcript of call.transcript"
+            (mouseover)="setActiveMatchedScript(transcript.sentence); transcriptInFocus=transcript;"
+            (mouseout)="setActiveMatchedScript(null); transcriptInFocus=null;">
+              <td scope='col' class='col-xl-2 col-lg-1 col-md-1 col-2'>{{ formatTime(transcript.timeFrom) }}</td>
+              <td scope='col' class='col-xl-3 col-lg-2 col-md-3 col-3'>{{ getFirstNameSerial(transcript.channel, call) }}</td>
+              <td 
+              scope='col' class='col-xl-7 col-lg-9 col-md-8 col-7'
+              [matTooltip]="getTooltipMessage(transcript, calls.activeMatchedScript$ | async, (calls.activeTranscript$ | async)?.script)"
+              matTooltipPosition="above"
+              matTooltipClass="custom-tooltip"
+              [ngClass]="{'matched' : (calls.matchingTranscripts$ | async)?.includes(transcript),
+              'matched-script' : (calls.matchingTranscripts$ | async) ?.includes(transcript) && transcriptInFocus===transcript
+              }">
+                {{ transcript.sentence }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="col-xl-6 mt-4">
+      <div class="card">
+        <h3>
+          <span class="font-weight-bold">Expected</span>
+          Percent of script covered : {{getScriptCoveragePercentage() | async}}
+        </h3>
+        <table *ngIf="calls.activeTranscript$ | async as call" width="100%" class='table table-borderless table-fixed'>
+          <thead>
+            <tr>
+              <th class='col-xl-2 col-lg-1 col-md-1 col-2'>Line</th>
+              <th class='col-xl-3 col-lg-2 col-md-3 col-3'>Speaker</th>
+              <th class='col-xl-7 col-lg-9 col-md-8 col-7'>Sentence</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let script of call.script; let indexOfScript = index;">
+              <td scope='col' class='col-xl-2 col-lg-1 col-md-1 col-2'>{{ indexOfScript + 1 }}</td>
+              <td scope='col' class='col-xl-3 col-lg-2 col-md-3 col-3'>Rep:</td>
+              <td #target scope='col' class='col-xl-7 col-lg-9 col-md-8 col-7' [ngClass]="{
+                'matched' : checkScriptMatch((calls.matchingTranscripts$ | async), script),
+                'matched-script' : (calls.activeMatchedScript$ | async) === script
+              }">
+                {{ script.sentence }}
+                <span>{{(calls.activeMatchedScript$ | async) === script ? scrollIntoView(target) : ""}}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
+</div>
 
-  <div class="card">
-    <h1>
-      Expected
-      <span>Matching: {{getScriptCoveragePercentage() | async}}</span>
-    </h1>
-    <!-- TODO: Add Expected -->
-    <table *ngIf="calls.activeTranscript$ | async as call" width="100%">
-      <thead>
-      <th>Line</th>
-      <th>Speaker</th>
-      <th>Sentence</th>
-      </thead>
-      <tbody>
-      <tr *ngFor="let script of call.script; let indexOfScript = index;">
-        <td>{{ indexOfScript + 1 }}</td>
-        <td>Rep:</td>
-        <td [ngClass]="{
-          'matched' : checkScriptMatch((calls.matchingTranscripts$ | async), script),
-          'matchedScript' : (calls.activeMatchedScript$ | async) === script
-        }">
-          {{ script.sentence }}
-        </td>
-      </tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<ng-template>
-  <div class="empty-state">
-    No data to be displayed
+<ng-template #noContent>
+  <div class="container-fluid">
+    <div class="row justify-content-center align-items-center empty-state flex-column">
+      <img src="..\assets\img\home.svg">
+      <h1 class='font-weight-bold'>Selection pending</h1>
+      <h3>
+        Select a call from top menu and a transcript
+        analysis will be shown here
+      </h3>
+    </div>
   </div>
 </ng-template>

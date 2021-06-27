@@ -1,11 +1,12 @@
-import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
-import {Router} from '@angular/router';
+import { AfterViewInit, ChangeDetectionStrategy, Component, TemplateRef, ViewChild } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import AgentFacade from 'src/app/core/facades/agent.facade';
 import CallFacade from 'src/app/core/facades/call.facade';
 import Script from 'src/app/core/models/script.model';
+import Call from 'src/app/core/models/call.model';
 
 import TemplateService from 'src/app/core/services/template.service';
+import Transcript from 'src/app/core/models/transcript.model';
 
 @Component({
   selector:        'app-analyzer',
@@ -13,45 +14,33 @@ import TemplateService from 'src/app/core/services/template.service';
   styleUrls:       ['./analyzer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export default class AnalyzerComponent implements OnInit, AfterViewInit {
+export default class AnalyzerComponent implements AfterViewInit {
   @ViewChild('subHeader')
   private subHeader?: TemplateRef<any>;
-  public dataSource: any[]    = [];
-  public dataSourceRep: any[] = [];
   public transcriptInFocus!: Script | null;
+  public selectedCall!: Call | null;
+  private counter!: string;
 
   constructor(
     public agents: AgentFacade,
     public calls: CallFacade,
     private _tplService: TemplateService,
-    private _router: Router,
-    private cd: ChangeDetectorRef
   ) {
   }
 
   public ngAfterViewInit(): void {
     this._tplService.register('subHeader', this.subHeader);
-    this.agents.agents$.subscribe((agents: any[]) => {
-      this.agents.setActiveAgent(agents[0]?.id);
-      this.calls.activeAgentCalls$.subscribe((calls: any[]) => {
-        this.calls.selectCall(calls[0]?.id);
-        this.calls.setMatchingPercentage(38);
-        this.cd.detectChanges();
-      });
-    });
   }
 
-  public ngOnInit(): void {
-    this.dataSource    = MOCK_DATA();
-    this.dataSourceRep = MOCK_DATA().slice(-25);
-  };
-
   public selectAgent(event: any): void {
-    this.agents.setActiveAgent(event.target?.value);
+    this.agents.setActiveAgent(event.value);
   };
 
   public selectCall(event: any): void {
-    this.calls.selectCall(event.target?.value);
+    this.calls.selectCall(event?.value);
+    if (event.value) {
+      this.calls.setMatchingPercentage('default');
+    }
   };
 
   public getScriptAlignmentPercentage(): Observable<string> {
@@ -100,6 +89,10 @@ export default class AnalyzerComponent implements OnInit, AfterViewInit {
     this.calls.setActiveMatchedScript(transcriptSentence);
   }
 
+  public scrollIntoView(target: any) {
+    target.scrollIntoView({behavior: 'smooth', block: 'start', inline: 'nearest'});
+  }
+
   public getTooltipMessage(transcript: Script, matchedScript: Script | null, scripts: Script[] | undefined): string {
     if (!transcript || !transcript.similarity || !scripts || !matchedScript)
       return "No matching text";
@@ -108,39 +101,31 @@ export default class AnalyzerComponent implements OnInit, AfterViewInit {
     const matchingSentence = matchedScript.sentence;
     return `${matchPercentage} matching with line #${lineNumber} "${matchingSentence}"`;
   }
-}
 
-const MOCK_DATA = () => {
-  const DATA: any[]        = [];
-  const SPEAKERS: string[] = [
-    'Harvey',
-    'Luke'
-  ];
-
-  let currentTime = 30;
-
-  for (let i = 0; i < 100; i++) {
-    const min = Math.floor(currentTime / 60);
-    const sec = Math.floor(currentTime - min * 60);
-
-    DATA.push({
-      time:     `${(
-        '0' + min
-      ).slice(-2)}:${(
-        '0' + sec
-      ).slice(-2)}`,
-      speaker:  SPEAKERS[Math.floor(Math.random() *
-        (
-          SPEAKERS.length
-        ))],
-      sentence: `This is a sample sentence #${i + 1}`
-    });
-
-    currentTime +=
-      (
-        Math.random() * 10
-      ) + 5;
+  public count(itemList: any): number {
+    if (!(itemList && itemList.length))
+      return 0;
+    return itemList.length;
   }
 
-  return DATA;
-};
+  public formatTime(time: number | null): string {
+    if (time === null) return "";
+    const min = Math.floor(time / 60);
+    const sec = Math.floor(time - min * 60);
+    return `${('0' + min).slice(-2)}:${('0' + sec).slice(-2)}`;
+  }
+
+  public getFirstNameSerial(channel: number, call: Transcript): string {
+    let name = call.getSpeaker(channel);
+    if (name === null) return "Unknown";
+    name = name.toString();
+    let firstName = name.split(' ')[0];
+    if (firstName === this.counter) return "";
+    this.counter = firstName;
+    return firstName;
+  }
+
+  public resetCounter() {
+    this.counter = "";
+  }
+}

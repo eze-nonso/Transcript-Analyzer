@@ -14,7 +14,7 @@ export default class CallState {
   private readonly _activeAgentCalls$     = new BehaviorSubject<Call[]>([]);
   private readonly _activeTranscript$     = new BehaviorSubject<Transcript | null>(null);
   private readonly _calls$                = new BehaviorSubject<Call[]>([]);
-  private readonly _matchingPercentage$   = new BehaviorSubject<number>(0);
+  private readonly _matchingPercentage$   = new BehaviorSubject<number>(38);
   private readonly _transcripts$          = new BehaviorSubject<Transcript[]>([]);
   private readonly _matchingTranscripts$  = new BehaviorSubject<Script[]>([]);
   private readonly _activeMatchedScript$  = new BehaviorSubject<Script | null>(null);
@@ -46,11 +46,12 @@ export default class CallState {
 
   public selectCall(id: string): void {
     const transcript = this._transcripts$.value.find((transcript) => transcript.id === id);
-    this._activeTranscript$.next(transcript? transcript : new Transcript());
+    this._activeTranscript$.next(transcript? transcript : null);
   }
 
   public setMatchingPercentage(value: number | string): void {
-    this._matchingPercentage$.next(parseInt(`${value}`));
+    if (value !== 'default')
+      this._matchingPercentage$.next(parseInt(`${value}`));
     let transcript = this._activeTranscript$.getValue();
     let matchingTranscripts = transcript?.transcript.filter(transcript => {
       if (transcript === null || transcript.similarity === null)

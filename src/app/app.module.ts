@@ -17,7 +17,7 @@ import { ROUTES } from './app.routing';
     BrowserAnimationsModule,
     RouterModule.forRoot(ROUTES),
 
-    FlexLayoutModule
+    FlexLayoutModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
