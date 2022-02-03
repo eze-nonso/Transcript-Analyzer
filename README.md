@@ -2,6 +2,8 @@
 
 An application that enables a customer representative company to view and compare similarities between transcripts of actual agent - customer calls to a pre-defined script sample
 
+Hosted at github pages [Homepage](https://eze-nonso.github.io/Transcript-Analyzer/).
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.0.2.
 
 ## Development server
