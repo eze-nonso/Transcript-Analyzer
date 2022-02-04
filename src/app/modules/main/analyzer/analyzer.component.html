@@ -6,7 +6,7 @@
         <div [ngClass]="{'overlay': count(agents.agents$ | async) <= 0}">
           <mat-form-field appearance="fill">
             <mat-icon class="png-icon" matPrefix>
-              <img src="..\assets\img\agent.png">
+              <img src="assets/img/agent.png" alt="agent">
             </mat-icon>
             <mat-select disableOptionCentering panelClass="myPanelClass"
             placeholder="Agent" 
@@ -24,7 +24,7 @@
         <div [ngClass]="{'overlay': count(calls.activeAgentCalls$ | async) <= 0}">
           <mat-form-field appearance="fill">
             <mat-icon class="png-icon" matPrefix>
-              <img src="..\assets\img\phone.png">
+              <img src="assets/img/phone.png" alt="phone">
             </mat-icon>
             <mat-select disableOptionCentering panelClass="myPanelClass"
             placeholder="Call"
@@ -47,6 +47,7 @@
         #matcher 
         (change)="calls.setMatchingPercentage(matcher.value)"
         [value]="calls.matchingPercentage$ | async"
+        id="matcher"
         max="100"
         min="1" type="range"
         class='mr-auto'>
@@ -129,7 +130,7 @@
 <ng-template #noContent>
   <div class="container-fluid">
     <div class="row justify-content-center align-items-center empty-state flex-column">
-      <img src="..\assets\img\home.svg">
+      <img src="assets/img/home.svg" alt="home">
       <h1 class='font-weight-bold'>Selection pending</h1>
       <h3>
         Select a call from top menu and a transcript
